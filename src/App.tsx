@@ -1,13 +1,14 @@
 import React from "react";
 import { Provider } from "react-redux";
 import store from "./store";
-import Counter from "./components/Counter";
+import Board from "./components/Board";
+import './style.css';
 
 function App() {
   return (
     <Provider store={store}>
       <div className="App">
-        <Counter />
+        <Board />
       </div>
     </Provider>
   );

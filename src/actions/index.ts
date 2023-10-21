@@ -1,5 +1,8 @@
-export const INCREMENT = "INCREMENT";
-export const DECREMENT = "DECREMENT";
+export const GAMEOVER = "GAMEOVER";
+export const OPEN = "OPEN"
 
-export const increment = () => ({ type: INCREMENT });
-export const decrement = () => ({ type: DECREMENT });
+export const gameover = () => ({ type: GAMEOVER });
+export const open = (idx: number) => ({ 
+    type: OPEN,
+    payload: { idx }
+});
