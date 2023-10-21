@@ -60,6 +60,20 @@ div.cell[data-mine="1"] button {
 div.cell[data-mine="1"][data-opened="1"] {
     background-color:#ff5555;
 }
+div.cell[data-flag="1"] button {
+    font-size: 0;
+    background-image: url('images/flag.png');
+    background-repeat: no-repeat;
+    background-size: 22px 22px;
+    background-position: center center;
+}
+div.cell[data-flag="2"] button {
+    font-size: 0;
+    background-image: url('images/question.png');
+    background-repeat: no-repeat;
+    background-size: 12px 12px;
+    background-position: center center;
+}
 div.cell[data-count="0"] { font-size: 0; } c
 div.cell[data-count="1"] { color: #0000cc; }
 div.cell[data-count="2"] { color: #00aa00; }
