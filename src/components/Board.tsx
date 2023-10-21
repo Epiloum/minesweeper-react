@@ -7,16 +7,13 @@ function Board(props: any) {
     let components: Array<any> = [];
     const cells = useSelector((state: any) => state.cells);
     const width = useSelector((state: any) => state.width);
-
-    const dispatch = useDispatch();
-    const actGameover = () => dispatch(gameover());
+    const gameover = useSelector((state: any) => state.gameover);
 
     return (
-        <div className="board">
+        <div className="board" data-gameover={gameover? 1: 0}>
             {Array(cells.length).fill(null).map((_, index) => 
                 <Cell key={index} idx={index} />
             )}
-            <button onClick={actGameover}>Game over toggle</button>
         </div>
     );
 };

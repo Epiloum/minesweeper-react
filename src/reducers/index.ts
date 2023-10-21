@@ -86,16 +86,51 @@ for(let i=0; i < cellWidth * cellHeight; i++) {
 // Define action
 // ========================================
 const counterReducer = (state = initialState, action: any) => {
-  switch (action.type) {
-    case OPEN:      
-      const newCells = lodash.cloneDeep(state.cells);
-      newCells[action.payload.idx].open();
-      return { ...state, cells: newCells };
-    case GAMEOVER:
-      return { ...state, gameover: !state.gameover };
-    default:
+switch (action.type) {
+  case OPEN: 
+    let newCells = lodash.cloneDeep(state.cells);
+    let idx = action.payload.idx;
+    let queue = [action.payload.idx];
+    let gameover = state.cells[idx].mine? true: false
+
+    if(state.gameover) {
+      // When game is over, do nothing.
       return state;
-  }
+    }
+
+    while(idx = queue.pop()) {
+      if (newCells[idx].open() && newCells[idx].count === 0) {
+        // Spread!        
+        const top = (idx < cellWidth);
+        const left = (idx % cellWidth === 0);
+        const bottom = (Math.floor(idx / cellWidth) === cellHeight - 1);
+        const right = (idx % cellWidth === cellWidth - 1);
+        
+        if(!top) {
+          queue.push(idx - cellWidth);
+          if(!left) { queue.push(idx - 1 - cellWidth); }
+          if(!right) { queue.push(idx + 1 - cellWidth); }
+        }
+        
+        if(!left) { queue.push(idx - 1); }
+        if(!right) { queue.push(idx + 1); }
+
+        if(!bottom) {
+          queue.push(idx + cellWidth);
+          if(!left) { queue.push(idx - 1 + cellWidth); }
+          if(!right) { queue.push(idx + 1 + cellWidth); }
+        }
+      }
+    }
+
+    return { ...state, cells: newCells, gameover };
+
+  case GAMEOVER:
+    return { ...state, gameover: !state.gameover };
+    
+  default:
+    return state;
+}
 };
 
 export default counterReducer;

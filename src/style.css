@@ -19,7 +19,7 @@ div.cell {
     border-bottom: 1px solid #ccc;
     background-color: #e3e3e3;
 }
-div.cell:active {
+div[data-gameover="0"] div.cell:active {
     border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-right: 1px solid #fff;
@@ -38,14 +38,6 @@ div.cell button {
     border: 0;
     cursor: pointer;
 }
-div.cell[data-mine="1"],
-div.cell[data-mine="1"] button {
-    font-size: 0;
-    background-image: url('images/mine.png');
-    background-repeat: no-repeat;
-    background-size: 14px 14px;
-    background-position: center center;
-}
 div.cell[data-opened="1"] {
     border: 0;
     background-color: #e3e3e3;
@@ -56,6 +48,17 @@ div.cell[data-opened="1"] {
 }
 div.cell[data-opened="1"] button {
     display: none;
+}
+div.cell[data-mine="1"],
+div.cell[data-mine="1"] button {
+    font-size: 0;
+    background-image: url('images/mine.png');
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
+    background-position: center center;
+}
+div.cell[data-mine="1"][data-opened="1"] {
+    background-color:#ff5555;
 }
 div.cell[data-count="0"] { font-size: 0; } c
 div.cell[data-count="1"] { color: #0000cc; }
