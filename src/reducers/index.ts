@@ -99,7 +99,9 @@ function openQueue(queue: Array<number>, cells: Array<any>, force: boolean) {
   let gameover = false;
 
   while(idx = queue.pop()) {
-    if (cells[idx].open() && !cells[idx].mine && cells[idx].count === 0) {
+    let res = cells[idx].open();
+
+    if (res && !cells[idx].mine && cells[idx].count === 0) {
       // Spread!        
       const top = (idx < cellWidth);
       const left = (idx % cellWidth === 0);
@@ -121,7 +123,8 @@ function openQueue(queue: Array<number>, cells: Array<any>, force: boolean) {
         if(!right) { queue.push(idx + 1 + cellWidth); }
       }
     }
-    if(cells[idx].mine) {
+
+    if(res && cells[idx].mine) {
       gameover = true;
     }
   }
