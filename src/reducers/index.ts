@@ -1,5 +1,5 @@
 import * as lodash from 'lodash';
-import { OPEN, FLAG, GAMEOVER } from "../actions";
+import { OPEN, ADJACENT_OPEN, FLAG, GAMEOVER } from "../actions";
 
 class Cell {
   mine: boolean = false;
@@ -14,6 +14,11 @@ class Cell {
       this.opened = true;
       return true;
     }
+  }
+
+  forceOpen(): boolean {
+    this.opened = true;
+    return !this.mine;
   }
 
   layMine(): boolean {
@@ -86,12 +91,51 @@ for(let i=0; i < cellWidth * cellHeight; i++) {
   initialState.cells[i].setCount(count);
 }
 
+// ========================================
+// Functions
+// ========================================
+function openQueue(queue: Array<number>, cells: Array<any>, force: boolean) {
+  let idx; 
+  let gameover = false;
+
+  while(idx = queue.pop()) {
+    if (cells[idx].open() && !cells[idx].mine && cells[idx].count === 0) {
+      // Spread!        
+      const top = (idx < cellWidth);
+      const left = (idx % cellWidth === 0);
+      const bottom = (Math.floor(idx / cellWidth) === cellHeight - 1);
+      const right = (idx % cellWidth === cellWidth - 1);
+      
+      if(!top) {
+        queue.push(idx - cellWidth);
+        if(!left) { queue.push(idx - 1 - cellWidth); }
+        if(!right) { queue.push(idx + 1 - cellWidth); }
+      }
+      
+      if(!left) { queue.push(idx - 1); }
+      if(!right) { queue.push(idx + 1); }
+
+      if(!bottom) {
+        queue.push(idx + cellWidth);
+        if(!left) { queue.push(idx - 1 + cellWidth); }
+        if(!right) { queue.push(idx + 1 + cellWidth); }
+      }
+    }
+    if(cells[idx].mine) {
+      gameover = true;
+    }
+  }
+
+  return gameover;
+}
+
 
 // ========================================
 // Define action
 // ========================================
 const counterReducer = (state = initialState, action: any) => {
   let newCells = lodash.cloneDeep(state.cells);  
+  let gameover: boolean = state.gameover;
   let idx;
 
   if(state.gameover) {
@@ -103,38 +147,52 @@ const counterReducer = (state = initialState, action: any) => {
     case OPEN: 
       idx = action.payload.idx;
       let queue = [action.payload.idx];
-      let gameover: boolean = state.gameover;
       
       if(state.cells[idx].flag !== 1) {
         gameover = state.cells[idx].mine? true: false
       }
 
-      while(idx = queue.pop()) {
-        if (newCells[idx].open() && !newCells[idx].mine && newCells[idx].count === 0) {
-          // Spread!        
-          const top = (idx < cellWidth);
-          const left = (idx % cellWidth === 0);
-          const bottom = (Math.floor(idx / cellWidth) === cellHeight - 1);
-          const right = (idx % cellWidth === cellWidth - 1);
-          
-          if(!top) {
-            queue.push(idx - cellWidth);
-            if(!left) { queue.push(idx - 1 - cellWidth); }
-            if(!right) { queue.push(idx + 1 - cellWidth); }
-          }
-          
-          if(!left) { queue.push(idx - 1); }
-          if(!right) { queue.push(idx + 1); }
-
-          if(!bottom) {
-            queue.push(idx + cellWidth);
-            if(!left) { queue.push(idx - 1 + cellWidth); }
-            if(!right) { queue.push(idx + 1 + cellWidth); }
-          }
-        }
-      }
+      openQueue(queue, newCells, false);
 
       return { ...state, cells: newCells, gameover };
+
+    case ADJACENT_OPEN:
+      idx = action.payload.idx;
+      let adjacentQueue = [];
+
+      // Enqueue Adjacent Cells
+      const top = (idx < cellWidth);
+      const left = (idx % cellWidth === 0);
+      const bottom = (Math.floor(idx / cellWidth) === cellHeight - 1);
+      const right = (idx % cellWidth === cellWidth - 1);
+      
+      if(!top) {
+        adjacentQueue.push(idx - cellWidth);
+        if(!left) { adjacentQueue.push(idx - 1 - cellWidth); }
+        if(!right) { adjacentQueue.push(idx + 1 - cellWidth); }
+      }
+      
+      if(!left) { adjacentQueue.push(idx - 1); }
+      if(!right) { adjacentQueue.push(idx + 1); }
+
+      if(!bottom) {
+        adjacentQueue.push(idx + cellWidth);
+        if(!left) { adjacentQueue.push(idx - 1 + cellWidth); }
+        if(!right) { adjacentQueue.push(idx + 1 + cellWidth); }
+      }
+
+      // Compare counting number
+      let flagCount = 0;
+      for(const v of adjacentQueue) {
+        flagCount += newCells[v].flag? 1: 0;
+      }
+
+      // Open all of adjacent cells without a flag
+      if (flagCount == newCells[idx].count) {        
+        gameover = openQueue(adjacentQueue, newCells, true);
+      }
+
+      return { ...state, cells: newCells, gameover: gameover };
 
     case FLAG:
       idx = action.payload.idx;
